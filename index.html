@@ -3,130 +3,363 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>To-Do App</title>
+
+<title>Modern To-Do App</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <style>
-body {
-    margin:0;
-    font-family: Arial;
-    background: #f0f2f5;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
 }
 
-.todo-container {
-    background:white;
-    padding:20px 25px;
-    border-radius:10px;
-    width:350px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#667eea,#764ba2);
+overflow:hidden;
 }
 
-.todo-container h2 {
-    text-align:center;
-    margin-bottom:15px;
+/* MAIN BOX */
+
+.todo-container{
+width:400px;
+padding:30px;
+border-radius:28px;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(14px);
+box-shadow:0 8px 32px rgba(0,0,0,0.25);
+color:white;
+animation:fadeIn 0.7s ease;
 }
 
-#taskInput {
-    width:80%;
-    padding:8px;
-    margin-bottom:10px;
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(25px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
 }
 
-button {
-    padding:8px 12px;
-    margin:0 3px;
-    border:none;
-    background:#4facfe;
-    color:white;
-    border-radius:4px;
-    cursor:pointer;
+.todo-container h2{
+text-align:center;
+margin-bottom:25px;
+font-size:32px;
 }
 
-ul {
-    list-style:none;
-    padding:0;
+/* INPUT */
+
+.input-box{
+display:flex;
+gap:10px;
+margin-bottom:20px;
 }
 
-li {
-    padding:10px;
-    background:#e9ecef;
-    margin-bottom:8px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-radius:4px;
+#taskInput{
+flex:1;
+padding:14px;
+border:none;
+outline:none;
+border-radius:14px;
+font-size:15px;
 }
 
-li.completed {
-    text-decoration: line-through;
-    opacity:0.6;
+.add-btn{
+width:60px;
+border:none;
+border-radius:14px;
+background:white;
+color:#333;
+font-size:20px;
+cursor:pointer;
+transition:0.3s;
 }
 
-li button {
-    background:#ff4d4d;
-    padding:5px 8px;
-    margin-left:5px;
+.add-btn:hover{
+transform:scale(1.08);
 }
+
+/* TASKS */
+
+ul{
+list-style:none;
+max-height:350px;
+overflow-y:auto;
+padding-right:4px;
+}
+
+li{
+background:rgba(255,255,255,0.12);
+padding:15px;
+border-radius:18px;
+margin-bottom:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+animation:slide 0.3s ease;
+}
+
+@keyframes slide{
+from{
+opacity:0;
+transform:translateX(-20px);
+}
+to{
+opacity:1;
+transform:translateX(0);
+}
+}
+
+.task-text{
+flex:1;
+cursor:pointer;
+font-size:16px;
+line-height:1.5;
+}
+
+/* COMPLETED */
+
+.completed .task-text{
+text-decoration:line-through;
+opacity:0.6;
+}
+
+/* BUTTONS */
+
+.task-buttons{
+display:flex;
+gap:8px;
+}
+
+.complete-btn,
+.delete-btn{
+border:none;
+padding:8px 10px;
+border-radius:10px;
+cursor:pointer;
+color:white;
+transition:0.3s;
+}
+
+.complete-btn{
+background:#22c55e;
+}
+
+.delete-btn{
+background:#ef4444;
+}
+
+.complete-btn:hover,
+.delete-btn:hover{
+transform:translateY(-3px);
+}
+
+/* EMPTY */
+
+.empty-text{
+text-align:center;
+opacity:0.7;
+margin-top:20px;
+}
+
+/* MOBILE */
+
+@media(max-width:450px){
+
+.todo-container{
+width:92%;
+padding:22px;
+}
+
+.input-box{
+flex-direction:column;
+}
+
+.add-btn{
+width:100%;
+height:50px;
+}
+
+}
+
 </style>
 </head>
+
 <body>
 
 <div class="todo-container">
-    <h2>📝 To-Do List</h2>
-    <input type="text" id="taskInput" placeholder="Add a new task">
-    <button onclick="addTask()">Add</button>
-    <ul id="taskList"></ul>
+
+<h2>
+📝 To-Do App
+</h2>
+
+<div class="input-box">
+
+<input
+type="text"
+id="taskInput"
+placeholder="Add your task..."
+>
+
+<button class="add-btn" onclick="addTask()">
+<i class="fa-solid fa-plus"></i>
+</button>
+
+</div>
+
+<ul id="taskList"></ul>
+
+<p class="empty-text" id="emptyText">
+No tasks added yet 🚀
+</p>
+
 </div>
 
 <script>
+
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-function saveTasks() {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+/* SAVE */
+
+function saveTasks(){
+
+localStorage.setItem('tasks', JSON.stringify(tasks));
+
 }
 
-function renderTasks() {
-    const taskList = document.getElementById('taskList');
-    taskList.innerHTML = '';
-    tasks.forEach((task, index) => {
-        const li = document.createElement('li');
-        li.className = task.completed ? 'completed' : '';
-        li.innerHTML = `
-            <span onclick="toggleComplete(${index})">${task.name}</span>
-            <div>
-                <button onclick="deleteTask(${index})">Delete</button>
-            </div>
-        `;
-        taskList.appendChild(li);
-    });
+/* RENDER */
+
+function renderTasks(){
+
+const taskList = document.getElementById('taskList');
+
+const emptyText = document.getElementById('emptyText');
+
+taskList.innerHTML = '';
+
+if(tasks.length === 0){
+
+emptyText.style.display = 'block';
+
+}else{
+
+emptyText.style.display = 'none';
+
 }
 
-function addTask() {
-    const input = document.getElementById('taskInput');
-    const taskName = input.value.trim();
-    if(taskName === '') return;
-    tasks.push({name: taskName, completed: false});
-    input.value = '';
-    saveTasks();
-    renderTasks();
+tasks.forEach((task,index)=>{
+
+const li = document.createElement('li');
+
+li.className = task.completed ? 'completed' : '';
+
+li.innerHTML = `
+
+<span
+class="task-text"
+onclick="toggleComplete(${index})"
+>
+${task.name}
+</span>
+
+<div class="task-buttons">
+
+<button
+class="complete-btn"
+onclick="toggleComplete(${index})"
+>
+<i class="fa-solid fa-check"></i>
+</button>
+
+<button
+class="delete-btn"
+onclick="deleteTask(${index})"
+>
+<i class="fa-solid fa-trash"></i>
+</button>
+
+</div>
+
+`;
+
+taskList.appendChild(li);
+
+});
+
 }
+
+/* ADD */
+
+function addTask(){
+
+const input = document.getElementById('taskInput');
+
+const taskName = input.value.trim();
+
+if(taskName === '') return;
+
+tasks.push({
+name:taskName,
+completed:false
+});
+
+input.value = '';
+
+saveTasks();
+
+renderTasks();
+
+}
+
+/* ENTER KEY */
+
+document.getElementById('taskInput').addEventListener('keypress',function(e){
+
+if(e.key === 'Enter'){
+
+addTask();
+
+}
+
+});
+
+/* COMPLETE */
 
 function toggleComplete(index){
-    tasks[index].completed = !tasks[index].completed;
-    saveTasks();
-    renderTasks();
+
+tasks[index].completed = !tasks[index].completed;
+
+saveTasks();
+
+renderTasks();
+
 }
+
+/* DELETE */
 
 function deleteTask(index){
-    tasks.splice(index,1);
-    saveTasks();
-    renderTasks();
+
+tasks.splice(index,1);
+
+saveTasks();
+
+renderTasks();
+
 }
 
-// Initial render
+/* INITIAL */
+
 renderTasks();
+
 </script>
 
 </body>
